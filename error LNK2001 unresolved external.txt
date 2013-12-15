@@ -1,0 +1,22 @@
+error LNK2001: unresolved external symbol _WinMain@16的解决方法
+--------------------Configuration: 123 - Win32 Debug--------------------
+Compiling...
+123.cpp
+Linking...
+LIBCD.lib(wincrt0.obj) : error LNK2001: unresolved external symbol 
+Debug/123.exe : fatal error LNK1120: 1 unresolved externals
+Error executing link.exe.
+123.exe - 2 error(s), 0 warning(s)
+============================================================================
+刚才想新建一个VC++ Console的程序，试验一下自己想的代码。
+但没注意，在创建的时候应该是误选择了“Win32 Application”，而不是想要的“Win32 Console Application”。所以即使只写void main(){}这条语句都不能通过“链接”（编译能通过），出错信息如上面。
+找了半天，开始以为是Project Settings里面的C++选项卡下的Code Generation中的毛病，或者是Precompiled Haders中的毛病，再者是Link选项卡中出了毛病，但改了一些地方，就是不好使！汗啊！~
+最后终于发现出错的地方了，选择“Win32 Application”，
+1.在C++Preprocessor中processor definitions中的设置是“WIN32,_DEBUG,_WINDOWS,_MBCS”
+2.而在Link选项卡下，最下面的Project options中的内容是“kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /incremental:yes /pdb:"Debug/123.pdb" /debug /machine:I386 /out:"Debug/123.exe" /pdbtype:sept ”
+注意两处：
+_WINDOWS
+和
+/subsystem:windows
+将这两处改成_CONSOLE和/subsystem:console就可以解决问题了。
+其实这就是将“Win32 Application”改成了“Win32 Console Application”。

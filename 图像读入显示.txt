@@ -21,3 +21,35 @@ int main( int argc, char** argv )
  
     return -1;
 }
+
+/***********************************
+#include "cv.h"
+#include "highgui.h"
+#include "cvaux.h"
+#include "cvcam.h"
+#include "cxcore.h"
+#include <cstdio>
+const int mm = 444;
+char s[mm];
+/// train by gavin 2013.12.15
+int main( int argc, char** argv )
+{
+    while(~scanf("%s",s))
+	{
+		
+		IplImage* img = 0;
+		img = cvLoadImage(s); ///picture name 
+		if(!img)
+			printf("Could not open\n");
+		else 
+		{
+			cvNamedWindow( "Image view", 1 ); ///create a window
+			cvShowImage( "Image view", img );
+			cvWaitKey(1000); // 非常重要，内部包含事件处理循环 set delay time
+			cvReleaseImage( &img );
+			cvDestroyWindow( "Image view" );
+		}
+	}
+	return 0;
+}
+**************************************/

@@ -1,0 +1,14 @@
+cvRectangle
+编辑
+
+OpenCV里面的绘图函数
+函数功能： 通过对角线上的两个顶点绘制简单、指定粗细或者带填充的矩形
+函数原型：void cvRectangle( CvArr* img, CvPoint pt1, CvPoint pt2, CvScalar color,int thickness=1, int line_type=8, int shift=0 );
+参数介绍：
+img -- 图像.
+pt1 -- 矩形的一个顶点。
+pt2 -- 矩形对角线上的另一个顶点
+color -- 线条颜色 (RGB) 或亮度（灰度图像 ）(grayscale image）。
+thickness -- 组成矩形的线条的粗细程度。取负值时（如 CV_FILLED）函数绘制填充了色彩的矩形。
+line_type -- 线条的类型。见cvLine的描述
+shift -- 坐标点的小数点位数。

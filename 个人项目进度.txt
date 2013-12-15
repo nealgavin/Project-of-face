@@ -1,0 +1,17 @@
+2013/12/15 
+/********************************
+开始决定项目全部使用opencv
+收获
+1.了解了opencv 1.0 的配置问题
+2. 学会使用图像图入显示。
+ cvNamedWindow( "Image view", 1 ); ///create a window
+ cvShowImage( "Image view", img );
+ cvWaitKey(1000); //内部包含事件处理循环 set delay time
+ cvReleaseImage( &img );
+ cvDestroyWindow( "Image view" );
+3.下一步，图像大小归一化，有点眉目，不过有些函数配置问题。
+困难
+1.opencv 1.0 中使用Mat 出问题，不知道为何？暂时搞不定
+2.下了个opencv 1.0的函数库 但是出不来郁闷>_<!
+工作时间： 19:00 - 21:00 2h
+********************************/

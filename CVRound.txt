@@ -1,0 +1,29 @@
+cvRound
+编辑
+
+openCv中的一个函数：
+int cvRound (double value)
+对一个double型的数进行四舍五入，并返回一个整型数！
+函数 cvRound, cvFloor, cvCeil 用一种舍入方法将输入浮点数转换成整数。 cvRound 返回和参数最接近的整数值。 cvFloor 返回不大于参数的最大整数值。
+cvCeil 返回不小于参数的最小整数值。在某些体系结构中该函数 工作起来比标准 C 操作起来还要快。
+注意下面的编程技巧：
+typedef union Cv32suf { int i; unsigned u; float f; }
+Cv32suf; CV_INLINE int cvFloor( double value )
+{ #if CV_SSE2 __m128d t = _mm_load_sd( &value );
+int i = _mm_cvtsd_si32(t);
+return i - _mm_movemask_pd(_mm_cmplt_sd(t,_mm_cvtsi32_sd(t,i)));
+#else
+int temp = cvRound(value);
+Cv32suf diff;
+diff.f = (float)(value - temp);
+return temp - (diff.i < 0);
+#endif }
+CV_INLINE int cvCeil( double value )
+{ #if CV_SSE2 __m128d t = _mm_load_sd( &value );
+int i = _mm_cvtsd_si32(t);
+return i + _mm_movemask_pd(_mm_cmplt_sd(_mm_cvtsi32_sd(t,i),t));
+#else int temp = cvRound(value);
+Cv32suf diff;
+diff.f = (float)(temp - value);
+return temp + (diff.i < 0); #endif } #if CV_SSE2
+[1]可见，如果支持IPP，则会加速。diff.f = (float)(value - temp); return temp - (diff.i < 0);这两句话的技巧：用diff.f保存浮点数。因为是联合体定义的diff，因此当再用diff.i解释那块内存时，可能数值会变化，但数值的正负不会变。
