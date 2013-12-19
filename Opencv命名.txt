@@ -1,0 +1,62 @@
+一：图像结构
+IplImage*
+（1）点的表示
+CvPoint p = cvPoint(int x,int y);
+CvPoint2D32f p = cvPoint2D32f(float x,float y);
+CvPoint3D32f p = cvPoint3D32f(float x,float y,float z):
+(2) 长方形维数表示
+CvSize r = cvSize(int Width,int Height);
+CvSize2D32f = cvSize2D32f(float width,float height);
+(3) 有偏移量的长方形表示
+ＣvRect r = cvRect(int x,int y,int width,int height);
+二：分配释放矩阵
+（1）分配矩阵
+CvMat* cvCreateMat(int rows,int cols,int type);
+type = CV_<bit_depth>(S|U|F)C<channels_ID>
+S 有符号
+U 无符号
+F 浮点
+（2） 释放矩阵
+void cvReleaseMat(CvMat**)
+eg: CvMat* M = cvCreateMat(4,4,CV_32FC1);
+	cvReleaseMat(&M);
+(3) 复制矩阵
+CvMat* cvCloneMat(CvMat*);
+(4)初始化矩阵
+double a[]={1,2,3,3,
+4,5,6,4,
+7,8,9,4
+};
+CvMat Ma = cvMat(3,4,CV_64FC1,a);///初始化成a矩阵
+OR
+cvInitMatHeader(&Ma,3,4,CV_64FC1,a);
+(5) 初始化单位矩阵
+CvMat* M = cvCreateMat(4,4,CV_32FC1);
+cvSetIdentity(M);
+三，访问矩阵元素
+cvmSet(M,i,j,2,0); //Set M[i][j]
+t = cvmGet(M,i,j);
+cvAdd(Ma,Mb,Mc) // Mc = Ma + Mb;
+cvSub
+cvMatMul
+向量乘法操作
+double a[]={1,2,3};
+double b[]={0,2,5};
+double c[3];
+CvMat va = cvMat(3,1,CV_64FC1,a);
+CvMat vb = cvMat(3,1,CV_64FC1,b);
+CvMat cv = cvMat(3,1,CV_64FC1,c);
+double res = cvDotProduct(&va,&vb); //va*vb
+cvCrossProduct(&va,&vb,&vc); // vc = ca x cb
+解非齐次线性方程
+CvMat* A = cvCreateMat(3,3,CV_32FC1);
+CvMat* x = cvCreateMat(3,1,CV_32FC1);
+CvMat* b = cvCreateMat(3,1,CV_32FC1);
+cvSolve(&A,&b,&x); //Ax = b;
+(6) 特征值分析
+CvMat* A = cvCreateMat(3,3,CV_32FC1);
+CvMat* E = cvCreateMat(3,3,CV_32FC1);
+CvMat* I = cvCreateMat(3,1,CV_32FC1);
+cvEigenVV(&A,&E,&I);
+
+
