@@ -1,0 +1,31 @@
+（1）图像数据格式
+n通道 m行 p列的像素值，也就是三维矩阵
+[channels][height][width]
+图像点访问
+效率低下
+CvScalar s;
+s = cvGet2D(img,i,j); //get the (i,j) pixel value
+printf("%d",s.val[0]);
+单
+s.val[0] = 123;
+cvSet2D(img,i,j,s); //设置图像像素点的值
+多
+s.val[0]=... s.val[1]=... s.val[2]=...
+效率好的
+单通道：((uchar*)(img->imageData+i*img->widthStep))[j] = 123;
+多通道：（(uchar*)(img->imageData+i*img->widthStep)）[j*img->nChannels+0]
+IplImage* img = 0;
+img = cvLoadImage(ImgName,0);//0 单通道，>0 3通道 <0 图像决定
+（2）图像存储
+cvSaveImage(outputFileName,img);
+outputFileName 可以是绝对相对路径，后缀可改变图像格式。
+（3）灰度图->彩色图
+cvConvertImage(src,dst,flags=0);
+src 灰度图像 dst彩色图像
+flags CV_CVTIMG_FLIP 垂直翻转
+      CV_CVTIMG_SWAP_RG 交换R和B
+（4）彩色->灰度图
+cvCvtColor(cimg,gimg,CV_RGB2GRAY)
+(5)彩色空间变换
+cvCvtColor(cimg,gimg,CV_RGB2GRAY)
+
