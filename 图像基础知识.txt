@@ -28,4 +28,9 @@ flags CV_CVTIMG_FLIP 垂直翻转
 cvCvtColor(cimg,gimg,CV_RGB2GRAY)
 (5)彩色空间变换
 cvCvtColor(cimg,gimg,CV_RGB2GRAY)
+（6）图像大小归一化
+先 dst=cvCreateImage(dst_size,depth,channels);
+cvResize(src,dst,CV_INTER_CUBIC) 方法
+转成目标大小。
+
 
