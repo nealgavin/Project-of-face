@@ -1,8 +1,7 @@
 /********************************************
 人脸识别版本New
 new:
-读入文件夹内符合条件的图片进行识别
-不需要知道文件数
+完成SQL动态query
 test data:
 2
 F:\project\code\training\Rsize_Pic\data\*.jpg
@@ -34,7 +33,6 @@ F:\project\code\training\Rsize_Pic\data\Computer*.jpg
 #include <mysql.h>
 #include <windows.h>
 
-#include <io.h>
 #ifdef _EiC
 #define WIN32
 #endif
@@ -42,8 +40,6 @@ using namespace std;
 
 #pragma comment(lib, "ws2_32.lib")
 #pragma comment(lib, "libmysql.lib")
-
-using namespace std;
 
 static CvMemStorage* storage = 0;
 static CvHaarClassifierCascade* cascade = 0;
@@ -58,23 +54,81 @@ CvMat* Unkonw;  ///待识别人脸矩阵
 CvMat* avg;
 CvMat* eigenvectors;
 CvMat* result;
+
 MYSQL mydata;
-int SQL_Link();
-void SQL_UnLink();
-int SQL_DATA();
-void ShowImg(IplImage*img);
-void get_File_Name(char*t,char*s,int id);
-void detect_and_draw( IplImage* img );
-CvMat* Load_Image_And_Training(int Training_Num,const char*Img_Path,bool sam);
-void MatchWhoPCA(char*path_who);///can add path or number
-void PickPCA();
-void Draw();
-void readFileAndMatchWhoPCA();
-void Match();
-void Funtion_Choose();
-int SQL_Link()
+
+void detect_and_draw( IplImage* image );
+bool SQL_query()
 {
-   //初始化数据结构
+    string sss,ttt;
+    cerr<<"Enter the sql code! while enter the '#' to end"<<endl;
+    ttt = "";
+    while(cin>>sss)
+    {
+        if(sss == "#")
+        break;
+        ttt += " ";
+        ttt += sss;
+    }
+    if(mysql_query(&mydata,ttt.c_str()) == 0)
+    {
+        cerr<<"query success!"<<endl;
+        return 1;
+    }
+    else
+    {
+        cerr<<"query failed!"<<endl;
+        return 0;
+    }
+}
+void SQL_query_and_show()
+{
+    MYSQL_RES* result = NULL;
+    if(!SQL_query())
+       return;
+     result = mysql_store_result(&mydata);
+     int row_num = mysql_num_rows(result);
+     cerr<<"row count"<<row_num<<endl;
+     unsigned int field_num = mysql_num_fields(result);
+     MYSQL_FIELD* field = NULL;
+     for(unsigned int i=0;i<field_num;++i)
+     {
+         field = mysql_fetch_field_direct(result,i);
+         cerr<<field->name<<"\t\t";
+     }
+     //打印各行
+     MYSQL_ROW row = NULL;
+     row = mysql_fetch_row(result);
+     while(row != NULL)
+     {
+         for(int i=0;i<field_num;++i)
+         {
+             cout<<row[i]<<"\t\t";
+         }
+         cout<<endl;
+         row = mysql_fetch_row(result);
+     }
+     mysql_free_result(result);
+}
+int SQL_DATA()
+{
+    //MYSQL mydata;
+    //初始化数据库
+    if(0==mysql_library_init(0,NULL,NULL))
+		 {
+		  cout<<"mysql_library_init() succeed"<<endl;
+		 }
+		 else
+		 {
+		  cout<<"mysql_library_init() failed"<<endl;
+		  return -1;
+		 }
+
+    #ifdef STEPBYSTEP
+		 system("pause");
+		#endif
+
+		 //初始化数据结构
 		 if(NULL!=mysql_init(&mydata))
 		 {
 		  cout<<"mysql_init() succeed"<<endl;
@@ -101,7 +155,7 @@ int SQL_Link()
        system("pause");
       #endif
 
-       if(!mysql_real_connect(&mydata,"localhost","root","dream","Face_Match",3306,NULL,0))
+       if(!mysql_real_connect(&mydata,"localhost","root","dream","test",3306,NULL,0))
               printf("\n连接数据库时发生错误!\n");
        else
               printf("\n连接数据库成功!\n");
@@ -109,37 +163,32 @@ int SQL_Link()
       #ifdef STEPBYSTEP
        system("pause");
       #endif
-}
-void SQL_UnLink()
-{
-   mysql_close(&mydata);
-   mysql_server_end();
-}
-int SQL_DATA()
-{
-
-    //初始化数据库
-//    if(0==mysql_library_init(0,NULL,NULL))
-//		 {
-//		  cout<<"mysql_library_init() succeed"<<endl;
-//		 }
-//		 else
-//		 {
-//		  cout<<"mysql_library_init() failed"<<endl;
-//		  return -1;
-//		 }
-//
-//    #ifdef STEPBYSTEP
-//		 system("pause");
-//		#endif
-
+      while(1)
+      {
+          cerr<<"choose:1:query 2:query and show 3:exit"<<endl;
+          int choose;
+          cin>>choose;
+          if(choose == 1)
+          {
+              SQL_query();
+          }
+          else if(choose == 2)
+          {
+              SQL_query_and_show();
+          }
+          else if(choose == 3)
+          {
+              break;
+          }
+      }
+      /****cut for test
       string sqlstr;
-       sqlstr ="CREATE TABLE IF NOT EXISTS user_info";
-       sqlstr+="(";
-       sqlstr+="user_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT 'Unique User ID',";
-       sqlstr+="user_name VARCHAR(100) CHARACTER SET gb2312 COLLATE gb2312_chinese_ci NULL COMMENT 'Name Of User',";
-       sqlstr+="user_second_sum INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'The Summation Of Using Time'";
-       sqlstr+=");";
+      sqlstr ="CREATE TABLE IF NOT EXISTS user_info";
+ sqlstr+="(";
+ sqlstr+="user_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT 'Unique User ID',";
+ sqlstr+="user_name VARCHAR(100) CHARACTER SET gb2312 COLLATE gb2312_chinese_ci NULL COMMENT 'Name Of User',";
+ sqlstr+="user_second_sum INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'The Summation Of Using Time'";
+ sqlstr+=");";
        if(0==mysql_query(&mydata,sqlstr.c_str()))
        {
         cout<<"mysql_query() create table succeed"<<endl;
@@ -154,23 +203,10 @@ int SQL_DATA()
       #ifdef STEPBYSTEP
        system("pause");
       #endif
-      //向表中插入数据
- sqlstr ="INSERT INTO user_info(user_name) VALUES('公司名称'),('一级部门'),('二级部门'),('开发小组'),('姓名');";
- if(0==mysql_query(&mydata,sqlstr.c_str()))
- {
-  cout<<"mysql_query() insert data succeed"<<endl;
- }
- else
- {
-  cout<<"mysql_query() insert data failed"<<endl;
-  mysql_close(&mydata);
-  return -1;
- }
- 
-#ifdef STEPBYSTEP
+
+      #ifdef STEPBYSTEP
  system("pause");
 #endif
-
 
  //显示刚才插入的数据
  sqlstr="SELECT user_id,user_name,user_second_sum FROM user_info";
@@ -219,7 +255,7 @@ int SQL_DATA()
 #ifdef STEPBYSTEP
  system("pause");
 #endif
-
+  cut for test****/
  //删除刚才建的表
  /*
  sqlstr="DROP TABLE user_info";
@@ -234,9 +270,10 @@ int SQL_DATA()
   return -1;
  }
  */
-   mysql_free_result(result);
+//mysql_free_result(result);
+ mysql_close(&mydata);
+ mysql_server_end();
 }
-
 void ShowImg(IplImage*img)
 {
    puts("AAAAAAAAAAAAAAAAAAAAAAAAAAA");
@@ -355,109 +392,46 @@ CvMat* Load_Image_And_Training(int Training_Num,const char*Img_Path,bool sam)
   char name[55],ID[20];
   CvMat Row_Header,*Row,*Train_Mat;
 
-  struct _finddata_t fileinfo;
-      char pic_path[path_len];
-      int handle;
-
-      handle = _findfirst(Img_Path,&fileinfo);
-      if(handle == -1)
-      {
-        cerr<<"path error or no file exit!"<<endl;
-        return Train_Mat;
-      }
-      Training_Num = 1;
-      while(!_findnext(handle,&fileinfo))
-      {
-        ++Training_Num;
-      }
-
-      handle = _findfirst(Img_Path,&fileinfo);
   Train_Mat = cvCreateMat(Training_Num,con_width*con_height,CV_32FC1);
-  int ti = 0;
- ////////////////////////////////////////
-   if(sam)
-   {
+  for(int i=0;i<Training_Num;++i)
+  {
+    strcpy(name,Img_Path);
+    if(sam)
+    {
+      itoa(i+1,ID,10); ///turn to 10 char
+      strcat(name,ID);
+      strcat(name,".jpg");
+    }
+    else
+    {
+//      itoa(5,ID,10); ///turn to 10 char
+//      strcat(name,ID);
+//      strcat(name,".jpg");
+    }
+    printf("ooo___%s\n",name);
+    dst = cvLoadImage(name,0);  ///重要，0单通道载入
+    CvMat* mat = cvCreateMat(dst->height,dst->width,CV_32FC1);
+//    ShowImg(dst);
+    cvConvert(dst,mat);///turn picture to Mat
+    Row = cvReshape(mat,&Row_Header,0,1); ///转成一列
 
+    float* ptr=(float*)(Train_Mat->data.fl+i*Train_Mat->step/4);
+    float* _ptr=(float*)Row->data.fl;
 
-
-      strcpy(pic_path,Img_Path);
-      int len = strlen(pic_path);
-      for(int i=len-1;i>=0;--i)
-        if(pic_path[i] == '\\')
-        {
-            pic_path[i+1] = '\0';
-            len = i+1;
-            break;
-        }
-      strcat(pic_path,fileinfo.name);
-          printf("ooo___%s\n",pic_path);
-      dst = cvLoadImage(pic_path,0);  ///重要，0单通道载入
-      CvMat* mat = cvCreateMat(dst->height,dst->width,CV_32FC1);
-  //    ShowImg(dst);
-      cvConvert(dst,mat);///turn picture to Mat
-      Row = cvReshape(mat,&Row_Header,0,1); ///转成一列
-
-      float* ptr=(float*)(Train_Mat->data.fl+ti*Train_Mat->step/4);
-                ti++;
-      float* _ptr=(float*)Row->data.fl;
-
-      for(int j=0;j<Train_Mat->cols;++j) ///将图片存入训练矩阵
-      {
-        *ptr = *_ptr;
-        ++ptr;
-        ++_ptr;
-      }
-    ////////////////////////////////////////////
-      while(!_findnext(handle,&fileinfo))
-      {
-        strcpy(pic_path,Img_Path);
-        pic_path[len] = '\0';
-        strcat(pic_path,fileinfo.name);
-        printf("ooo___%s\n",pic_path);
-        dst = cvLoadImage(pic_path,0);  ///重要，0单通道载入
-        CvMat* mat = cvCreateMat(dst->height,dst->width,CV_32FC1);
-    //    ShowImg(dst);
-        cvConvert(dst,mat);///turn picture to Mat
-        Row = cvReshape(mat,&Row_Header,0,1); ///转成一列
-
-        float* ptr=(float*)(Train_Mat->data.fl+ti*Train_Mat->step/4);
-        float* _ptr=(float*)Row->data.fl;
-        ti++;
-        for(int j=0;j<Train_Mat->cols;++j) ///将图片存入训练矩阵
-        {
-          *ptr = *_ptr;
-          ++ptr;
-          ++_ptr;
-        }
-      }
-      _findclose(handle);
-   }
-   else
-   {
-       printf("ooo___%s\n",Img_Path);
-      dst = cvLoadImage(Img_Path,0);  ///重要，0单通道载入
-      CvMat* mat = cvCreateMat(dst->height,dst->width,CV_32FC1);
-  //    ShowImg(dst);
-      cvConvert(dst,mat);///turn picture to Mat
-      Row = cvReshape(mat,&Row_Header,0,1); ///转成一列
-
-      float* ptr=(float*)(Train_Mat->data.fl+ti*Train_Mat->step/4);
-      float* _ptr=(float*)Row->data.fl;
-
-      for(int j=0;j<Train_Mat->cols;++j) ///将图片存入训练矩阵
-      {
-        *ptr = *_ptr;
-        ++ptr;
-        ++_ptr;
-      }
-   }
+    for(int j=0;j<Train_Mat->cols;++j) ///将图片存入训练矩阵
+    {
+      *ptr = *_ptr;
+      ++ptr;
+      ++_ptr;
+    }
+  }
   return Train_Mat;
 }
-void MatchWhoPCA(char*path_who)///can add path or number
+void MatchWhoPCA()///can add path or number
 {
-//    printf("enter the path of Who match!\n");
-//    char path_who[path_len];
-//    scanf("%s",path_who);
+    printf("enter the path of Who match!\n");
+    char path_who[path_len];
+    scanf("%s",path_who);
     CvMat* Unkonw = Load_Image_And_Training(1,path_who/*ID_Student*/,0);
     CvMat* result2 = cvCreateMat(Unkonw->rows,min(Sample->rows,Sample->cols),CV_32FC1);
            cvProjectPCA( Unkonw,avg,eigenvectors,result2 );
@@ -501,9 +475,9 @@ void MatchWhoPCA(char*path_who)///can add path or number
 }
 void PickPCA()
 {
-//  printf("enter the number of Sample!\n");
+  printf("enter the number of Sample!\n");
   int Sample_Num;
-//  scanf("%d",&Sample_Num);
+  scanf("%d",&Sample_Num);
   printf("enter the path of Sameple!\n");
   char Path_of_Img[path_len];
   scanf("%s",Path_of_Img);
@@ -577,40 +551,6 @@ void Draw()
         }
 //        cvDestroyWindow("result");
 }
-void readFileAndMatchWhoPCA()
-{
-    cerr<<"enter the path of WHO"<<endl;
-    struct _finddata_t fileinfo;
-    char file_path[path_len],pic_path[path_len];
-    int handle;
-    scanf("%s",file_path);
-    handle = _findfirst(file_path,&fileinfo);
-    if(handle == -1)
-    {
-      cerr<<"path error or no file exit!"<<endl;
-      return;
-    }
-
-    strcpy(pic_path,file_path);
-    int len = strlen(pic_path);
-    for(int i=len-1;i>=0;--i)
-      if(pic_path[i] == '\\')
-      {
-          pic_path[i+1] = '\0';
-          len = i+1;
-          break;
-      }
-    strcat(pic_path,fileinfo.name);
-    MatchWhoPCA(pic_path);
-    while(!_findnext(handle,&fileinfo))
-    {
-      strcpy(pic_path,file_path);
-      pic_path[len] = '\0';
-      strcat(pic_path,fileinfo.name);
-      MatchWhoPCA(pic_path);
-    }
-    _findclose(handle);
-}
 void Match()
 {
 //    printf("Load img from ku!\nenter the path:\n");
@@ -624,7 +564,6 @@ void Match()
 //    int Sample_num;
 //    scanf("%d",&Sample_num);
     PickPCA();
-    cerr<<"OK PickPCA"<<endl;
     while(true)
     {
       printf("fuction:1.enter the path of who and match! 2.exit\n");
@@ -633,7 +572,7 @@ void Match()
       switch(x)
       {
       case 1:
-        readFileAndMatchWhoPCA(); break;
+        MatchWhoPCA(); break;
       case 2:
         return;
       default:printf("error! Input again!\n");
@@ -660,9 +599,7 @@ void Funtion_Choose()
 }
 int main()
 {
-    SQL_Link();
     Funtion_Choose();
-    SQL_UnLink();
     cvWaitKey(0);
 //    while(~scanf("%s",path_name))
 //    {
