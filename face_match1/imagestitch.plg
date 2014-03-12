@@ -1,0 +1,56 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: imagestitch - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\Users\ADMINI~1\AppData\Local\Temp\RSP2A07.tmp" with contents
+[
+cxcore.lib cv.lib ml.lib cvaux.lib highgui.lib cvcam.lib libmysql.lib /nologo /subsystem:windows /incremental:yes /pdb:"Debug/imagestitch.pdb" /debug /machine:I386 /out:"Debug/imagestitch.exe" /pdbtype:sept 
+.\Debug\AddDlg.obj
+.\Debug\ChildFrm.obj
+.\Debug\CourseDlg.obj
+.\Debug\featurematch.obj
+.\Debug\GradeDlg.obj
+.\Debug\imagefull.obj
+.\Debug\imagestitch.obj
+.\Debug\imagestitchDoc.obj
+.\Debug\imagestitchView.obj
+.\Debug\MainFrm.obj
+.\Debug\StdAfx.obj
+.\Debug\stitchimage.obj
+.\Debug\StuDlg.obj
+.\Debug\imagestitch.res
+]
+Creating command line "link.exe @C:\Users\ADMINI~1\AppData\Local\Temp\RSP2A07.tmp"
+<h3>Output Window</h3>
+Linking...
+Creating temporary file "C:\Users\ADMINI~1\AppData\Local\Temp\RSP2D42.tmp" with contents
+[
+/nologo /o"Debug/imagestitch.bsc" 
+.\Debug\StdAfx.sbr
+.\Debug\AddDlg.sbr
+.\Debug\ChildFrm.sbr
+.\Debug\CourseDlg.sbr
+.\Debug\featurematch.sbr
+.\Debug\GradeDlg.sbr
+.\Debug\imagefull.sbr
+.\Debug\imagestitch.sbr
+.\Debug\imagestitchDoc.sbr
+.\Debug\imagestitchView.sbr
+.\Debug\MainFrm.sbr
+.\Debug\stitchimage.sbr
+.\Debug\StuDlg.sbr]
+Creating command line "bscmake.exe @C:\Users\ADMINI~1\AppData\Local\Temp\RSP2D42.tmp"
+Creating browse info file...
+<h3>Output Window</h3>
+
+
+
+<h3>Results</h3>
+imagestitch.exe - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>
